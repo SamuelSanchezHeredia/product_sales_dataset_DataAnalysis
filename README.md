@@ -108,7 +108,7 @@ p5 <- ggplot(top_products,
 ### 3. **Revenue por Región**
 
 <div align="center">
-  <img src="plots/matriz_correlacion.png" alt="Revenue por Región" width="700"/>
+  <img src="plots/revenue_por_region.png" alt="Revenue por Región" width="700"/>
 </div>
 
 ```r
@@ -147,7 +147,7 @@ p8 <- ggplot(df, aes(x = Category, y = Profit)) +
 ### 5. **Matriz de Correlación (Variables Numéricas)**
 
 <div align="center">
-  <img src="plots/revenue_por_region.png" alt="Matriz de Correlación" width="700"/>
+  <img src="plots/matriz_correlacion.png" alt="Matriz de Correlación" width="700"/>
 </div>
 
 ```r
