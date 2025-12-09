@@ -177,7 +177,7 @@ corrplot(corr_mat, method = 'color', type = 'upper', tl.cex = 0.8)
 
 ```
 eda/
-├── images/                     # Carpeta con las gráficas del análisis
+├── plots/                     # Carpeta con las gráficas del análisis
 │   ├── revenue_por_categoria.png
 │   ├── top20_productos.png
 │   ├── revenue_por_region.png
