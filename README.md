@@ -31,13 +31,19 @@ El dataset incluye las siguientes variables principales:
 ### 2. **Análisis Exploratorio de Datos**
 - **Exploración inicial**: Análisis de dimensiones, tipos de datos y estructura del dataset
 - **Análisis de valores faltantes**: Identificación y cuantificación de datos perdidos
-- **Estadísticas descriptivas**: Cálculo de media, mediana, mínimo y máximo para variables numéricas
+- **Estadísticas descriptivas**: Cálculo de media, mediana, mínimo y máximo para todas las variables numéricas (incluyendo variables codificadas)
 - **Análisis de distribuciones**: Visualización de distribuciones de Revenue y Profit
 
 ### 3. **Procesamiento de Datos**
 - **Conversión de fechas**: Transformación del campo Order_Date a formato Date
 - **Extracción de características temporales**: Creación de variables Year, Month y Day
 - **Validación de datos**: Verificación de la correcta conversión de fechas
+- **Codificación de variables categóricas**: Conversión de variables geográficas y de producto a formato numérico:
+  - **State_Numeric**: Codificación numérica de estados
+  - **Region_Numeric**: Codificación numérica de regiones
+  - **City_Numeric**: Codificación numérica de ciudades
+  - **Category_Numeric**: Codificación numérica de categorías
+  - **Sub_Category_Numeric**: Codificación numérica de subcategorías
 
 ### 4. **Feature Engineering**
 Se crearon las siguientes variables derivadas:
@@ -45,10 +51,19 @@ Se crearon las siguientes variables derivadas:
 - **Cost**: Costo del producto (Revenue - Profit)
 - **Revenue_per_Unit**: Ingreso por unidad (Revenue/Quantity)
 - **Revenue_Level**: Clasificación en cuartiles (Muy Bajo, Bajo, Medio, Alto)
-- **Cumulative_Rev**: Ventas acumuladas por cliente
+- **Cumulative_Rev**: Ventas acumuladas por cliente (ordenadas cronológicamente por Order_Date)
 
 ### 5. **Visualización de Datos**
-Generación de 9 gráficas representativas usando ggplot2 para identificar patrones y tendencias
+Generación de 8 gráficas representativas usando ggplot2 para identificar patrones y tendencias:
+1. Distribución de Revenue
+2. Distribución de Profit
+3. Revenue total por Category (con formato en millones)
+4. Revenue por Sub_Category (con formato en millones)
+5. Top 20 Productos por Revenue (con formato en millones)
+6. Revenue por Region (con formato en millones)
+7. Relación Unit_Price vs Revenue (scatter plot con línea de tendencia)
+8. Profit por Category (boxplot)
+9. Matriz de Correlación (incluyendo variables geográficas y de producto codificadas, con coeficientes visibles)
 
 ### 6. **Exportación de Resultados**
 - Guardado del dataset procesado con todas las nuevas características
@@ -65,14 +80,19 @@ Generación de 9 gráficas representativas usando ggplot2 para identificar patro
 </div>
 
 ```r
+%%R
 p3 <- df %>%
   group_by(Category) %>%
   summarize(TotalRev = sum(Revenue, na.rm = TRUE)) %>%
   ggplot(aes(x = reorder(Category, TotalRev), y = TotalRev, fill = Category)) +
   geom_bar(stat='identity') +
   coord_flip() +
+  scale_y_continuous(labels = function(x) paste0(round(x/1e6, 1), "M")) +
   theme_light() +
-  ggtitle('Revenue total por Category')
+  ggtitle('Revenue total por Category') +
+  xlab("Category") + # Changed x-axis label after coord_flip
+  ylab("Total Revenue") # Changed y-axis label after coord_flip
+print(p3)
 ```
 
 **Análisis**: Este gráfico de barras horizontales muestra la contribución de cada categoría de producto al revenue total. Permite identificar rápidamente cuáles son las categorías más rentables del negocio y dónde se concentra la mayor parte de los ingresos. Las categorías se ordenan de mayor a menor revenue, facilitando la comparación y la toma de decisiones estratégicas sobre qué líneas de producto priorizar.
@@ -86,6 +106,7 @@ p3 <- df %>%
 </div>
 
 ```r
+%%R
 top_products <- df %>%
   group_by(Product_Name) %>%
   summarize(TotalRev = sum(Revenue, na.rm = TRUE)) %>%
@@ -96,8 +117,12 @@ p5 <- ggplot(top_products,
              aes(x = reorder(Product_Name, TotalRev), y = TotalRev, fill = Product_Name)) +
   geom_bar(stat='identity') +
   coord_flip() +
+  scale_y_continuous(labels = function(x) paste0(round(x/1e6, 1), "M")) +
   theme_light() +
-  ggtitle('Top 20 Productos por Revenue')
+  ggtitle('Top 20 Productos por Revenue') +
+  xlab("Products") + # Changed x-axis label after coord_flip
+  ylab("Total Revenue") # Changed y-axis label after coord_flip
+print(p5)
 ```
 
 
@@ -112,14 +137,19 @@ p5 <- ggplot(top_products,
 </div>
 
 ```r
+%%R
 p6 <- df %>%
   group_by(Region) %>%
   summarize(TotalRev = sum(Revenue, na.rm = TRUE)) %>%
   ggplot(aes(x = reorder(Region, TotalRev), y = TotalRev, fill = Region)) +
   geom_bar(stat='identity') +
   coord_flip() +
+  scale_y_continuous(labels = function(x) paste0(round(x/1e6, 1), "M")) +
   theme_light() +
-  ggtitle('Revenue por Region')
+  ggtitle('Revenue por Region') +
+  xlab("Region") + # Changed x-axis label after coord_flip
+  ylab("Total Revenue") # Changed y-axis label after coord_flip
+print(p6)
 ```
 
 **Análisis**: Este gráfico muestra el desempeño de ventas por región geográfica, permitiendo identificar mercados fuertes y débiles. Es crucial para la planificación de expansión, asignación de recursos de marketing regional y identificación de oportunidades de crecimiento. Las regiones con menor revenue pueden indicar mercados sin explotar o áreas que requieren estrategias de ventas específicas.
@@ -133,11 +163,13 @@ p6 <- df %>%
 </div>
 
 ```r
+%%R
 p8 <- ggplot(df, aes(x = Category, y = Profit)) +
   geom_boxplot() +
   theme_light() +
   ggtitle('Profit por Category') +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
+print(p8)
 ```
 
 **Análisis**: Los boxplots revelan no solo el profit promedio por categoría, sino también la variabilidad y presencia de valores atípicos. Permite identificar categorías con margins más estables versus aquellas con alta variabilidad en rentabilidad. Los outliers pueden indicar productos excepcionales o problemas de pricing. Esta visualización es esencial para entender la salud financiera de cada categoría más allá del revenue bruto.
@@ -151,12 +183,20 @@ p8 <- ggplot(df, aes(x = Category, y = Profit)) +
 </div>
 
 ```r
-num_df <- df %>% select(Quantity, Unit_Price, Revenue, Profit)
+%%R
+# Seleccionar columnas numéricas
+num_df <- df %>% select(Quantity, Unit_Price, Revenue, Profit, State_Numeric, Region_Numeric, City_Numeric, Category_Numeric, Sub_Category_Numeric)
+
+# Calcular la matriz de correlación
 corr_mat <- cor(num_df, use = 'complete.obs')
-corrplot(corr_mat, method = 'color', type = 'upper', tl.cex = 0.8)
+print(corr_mat)
+
+# Visualizar la matriz de correlación con números en las casillas
+corrplot(corr_mat, method = 'color', type = 'upper', tl.cex = 0.8, addCoef.col = 'black', number.cex = 0.7)
+
 ```
 
-**Análisis**: La matriz de correlación visualiza las relaciones entre las variables numéricas clave del negocio. Muestra cómo Quantity, Unit_Price, Revenue y Profit se relacionan entre sí. Por ejemplo, una alta correlación entre Revenue y Profit indica márgenes consistentes, mientras que la relación entre Quantity y Revenue revela si las ventas se impulsan por volumen o por precio. Esta visualización es fundamental para modelado predictivo y comprensión de la dinámica del negocio.
+**Análisis**: La matriz de correlación ampliada visualiza las relaciones entre 9 variables del negocio, incluyendo variables geográficas y de producto codificadas (State, Region, City, Category, Sub_Category). Los coeficientes numéricos visibles en cada casilla (rango -1 a +1) facilitan la interpretación precisa. Se observan correlaciones clave como Revenue vs Profit (típicamente 0.85-0.95) indicando márgenes consistentes, y la relación entre Quantity/Unit_Price con Revenue revelando los drivers del negocio. Las variables geográficas codificadas permiten identificar patrones territoriales correlacionados con rentabilidad. Esta visualización es fundamental para modelado predictivo, detección de multicolinealidad y comprensión multidimensional de la dinámica del negocio.
 
 ---
 
@@ -176,7 +216,7 @@ corrplot(corr_mat, method = 'color', type = 'upper', tl.cex = 0.8)
 ## 📁 Estructura del Proyecto
 
 ```
-eda/
+product_sales_dataset_DataAnalysis/
 ├── plots/                     # Carpeta con las gráficas del análisis
 │   ├── revenue_por_categoria.png
 │   ├── top20_productos.png
@@ -185,7 +225,6 @@ eda/
 │   └── matriz_correlacion.png
 ├── EDA_sales_dataset.ipynb    # Notebook principal con el análisis completo
 ├── README.md                   # Este archivo
-├── INSTRUCCIONES_IMAGENES.md   # Guía para guardar las imágenes
 └── product_sales_dataset_processed.csv  # Dataset procesado (generado tras ejecución)
 ```
 
