@@ -200,6 +200,17 @@ corrplot(corr_mat, method = 'color', type = 'upper', tl.cex = 0.8, addCoef.col =
 
 ---
 
+## 🛠️ Diagrama MER para paso a Base de Datos 
+
+<div align="center">
+  <img src="plots/Database Schema – Product Sales.png" alt="Matriz de Correlación" width="700"/>
+</div>
+
+**Diagrama MER**: El diagrama muestra la estructura relacional propuesta para almacenar el dataset en una base de datos relacional. Incluye tablas para Clientes, Productos, Categorías, Regiones y Ventas, con claves primarias y foráneas que aseguran la integridad referencial. Esta estructura facilita consultas eficientes y análisis avanzados en un entorno de base de datos.
+
+
+---
+
 ## 🛠️ Tecnologías Utilizadas
 
 - **Lenguaje**: R (ejecutado en Google Colab mediante rpy2)
